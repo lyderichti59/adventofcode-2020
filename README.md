@@ -1,6 +1,11 @@
 # Clojurish Advent Of Code
 
+## Run
+ 
+* With clojure `clj -M -m dayN`
+* With babashka `./run dayN`
 
-* With clojure `clj -M -i ./src/dayN.clj`
+## Test
 
-* With babashka `bb -f ./src/dayN.clj`
+* With clojure `clj -M:test -n day2_test`
+* With babashka `./run-test day2`

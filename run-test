@@ -1,0 +1,11 @@
+#!/usr/bin/env bb
+
+(def day (or (first *command-line-args*) "day2"))
+(def day-test (str day "_test"))
+(load-file (str "src/" day ".clj"))
+(load-file (str "test/" day-test ".clj"))
+
+(require (symbol day-test))
+(require '[clojure.test :refer [run-tests]])
+
+(run-tests (symbol day-test))

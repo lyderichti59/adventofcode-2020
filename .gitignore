@@ -1,0 +1,5 @@
+/src/user.clj
+.idea/
+.cpcache/
+.nrepl-port
+*.log

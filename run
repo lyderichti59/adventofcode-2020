@@ -1,0 +1,8 @@
+#!/usr/bin/env bb
+
+(def day (or (first *command-line-args*) "day2"))
+(load-file (str "src/" day ".clj"))
+
+(require (symbol day))
+
+(@(resolve (symbol day "-main")))
