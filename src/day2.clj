@@ -1,9 +1,8 @@
 (ns day2
-  (:require 
+  (:require
     [clojure.string :as str]
     [clojure.java.io :as io]
-    [clojure.pprint :refer [pprint]]
-    [clojure.test :refer [deftest is run-tests]]))
+    [clojure.pprint :refer [pprint]]))
 
 ;; PART 1
 
