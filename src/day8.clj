@@ -2,48 +2,41 @@
   (:require  [clojure.java.io :as io]
              [clojure.string :as str]))
 
-(defn parse-line
-  "Parses a line"
-  [line]
+(defn parse-line [line]
   (let [[op vstr] (str/split line #" ")]
     [op (Integer. vstr)]))
 
-(defn calc-while-not-visited
-  "Apply codes while the position as not already been visited"
-  [codes [acc position visited] false-if-visited]
+(defn apply-code-to-state [[op v] [acc pos visited]]
+  (case op
+    "nop" [acc (inc pos) (conj visited pos)]
+    "acc" [(+ acc v) (inc pos) (conj visited pos)]
+    "jmp" [acc (+ pos v) (conj visited pos)]))
+
+(defn apply-codes-to-state [codes [_ position visited :as state] f-if-visited]
   (cond
-    (and false-if-visited (visited position)) false
-    (or (<= (count codes) position) (visited position)) acc
-    :else (let [[op v] (nth codes position)
-                refreshed-visited (conj visited position)]
-            (case op
-              "nop" (recur codes [acc (inc position) refreshed-visited] false-if-visited)
-              "acc" (recur codes [(+ acc v) (inc position) refreshed-visited] false-if-visited)
-              "jmp" (recur codes [acc (+ position v) refreshed-visited] false-if-visited)))))
+    (visited position) (f-if-visited state)
+    (<= (count codes) position) state
+    :else (recur codes
+                 (apply-code-to-state (nth codes position) state)
+                 f-if-visited)))
 
-(defn swap-nth
-  "Swap 'jmp' and 'nop' at nth position"
-  [codes position]
-  (let [swap #(case % "nop" "jmp", "jmp" "nop", %)]
-    (update-in codes [position 0] swap)))
+(defn swap-nth [codes position]
+  (update-in codes [position 0] #({"nop" "jmp", "jmp" "nop"} % %)))
 
-(defn transform-codes
-  "Return a lazy sequence of modified codes (swap of 'nop' and 'jmp' opcodes)"
-  [codes]
+(defn transform-codes [codes]
   (let [indexed-codes (map-indexed vector codes) ;; Returns a vector of [n [op v]]
-        swappable-codes (filter (comp #{"nop" "jmp"} first second) indexed-codes)]
-    (map (comp (partial swap-nth codes) first) swappable-codes)))
+        swappable-codes (filter (comp #{"nop" "jmp"} first second) indexed-codes)
+        swappable-positions (map first swappable-codes)]
+    (map (partial swap-nth codes) swappable-positions)))
 
 (with-open [rdr (io/reader "./inputs/day8.txt")]
-  (let [codes (->> (line-seq rdr)
-                   (map parse-line)
-                   vec)
+  (let [codes (mapv parse-line (line-seq rdr))
         state [0 0 #{}] ;; [acc position visited]
-        result1 (calc-while-not-visited codes state false)
+        result1 (first (apply-codes-to-state codes state identity))
         codes-seq (transform-codes codes)
         result2 (->> codes-seq
-                     (map #(calc-while-not-visited % state true))
+                     (map #(apply-codes-to-state % state (constantly nil)))
+                     (map first)
                      (drop-while not)
-                     first)
-        result [result1 result2]]
-    (println result)))
+                     first)]
+    (println [result1 result2])))
