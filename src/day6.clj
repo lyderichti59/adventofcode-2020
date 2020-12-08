@@ -1,7 +1,8 @@
 (ns day6
-  (:require [clojure.java.io :as io]
-            [clojure.string :as s]
-            [clojure.set]))
+  (:require
+   [clojure.java.io :as io]
+   clojure.set
+   [clojure.string :as s]))
 
                                         ; PART 1
 (def result
